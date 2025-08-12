@@ -8,21 +8,43 @@ export default function useKeyboard() {
   const [send] = useJsonRpc();
 
   const rpcDataChannel = useRTCStore(state => state.rpcDataChannel);
+  const hidDataChannel = useRTCStore(state => state.hidDataChannel);
+
   const updateActiveKeysAndModifiers = useHidStore(
     state => state.updateActiveKeysAndModifiers,
   );
 
   const sendKeyboardEvent = useCallback(
     (keys: number[], modifiers: number[]) => {
-      if (rpcDataChannel?.readyState !== "open") return;
+      const rpcChannelReady = rpcDataChannel?.readyState === "open";
+      const hidChannelReady = hidDataChannel?.readyState === "open";
+      if (!rpcChannelReady && !hidChannelReady) return;
+
       const accModifier = modifiers.reduce((acc, val) => acc + val, 0);
 
-      send("keyboardReport", { keys, modifier: accModifier });
+      if (hidChannelReady) {
+        if (accModifier > 0) {
+          hidDataChannel?.send(new Uint8Array([1, accModifier, ...keys]));
+        } else {
+          if (keys.length > 0) {
+            hidDataChannel?.send(new Uint8Array([2, ...keys]));
+          } else {
+            hidDataChannel?.send(new Uint8Array([3]));
+          }
+        }
+      } else {
+        send("keyboardReport", { keys, modifier: accModifier });
+      }
 
       // We do this for the info bar to display the currently pressed keys for the user
       updateActiveKeysAndModifiers({ keys: keys, modifiers: modifiers });
     },
-    [rpcDataChannel?.readyState, send, updateActiveKeysAndModifiers],
+    [
+      hidDataChannel?.readyState,
+      rpcDataChannel?.readyState,
+      send,
+      updateActiveKeysAndModifiers,
+    ],
   );
 
   const resetKeyboardState = useCallback(() => {

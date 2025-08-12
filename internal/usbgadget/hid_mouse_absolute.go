@@ -88,6 +88,8 @@ func (u *UsbGadget) AbsMouseReport(x, y int, buttons uint8) error {
 	u.absMouseLock.Lock()
 	defer u.absMouseLock.Unlock()
 
+	u.log.Trace().Int("x", x).Int("y", y).Uint8("buttons", buttons).Msg("AbsMouseReport")
+
 	err := u.absMouseWriteHidFile([]byte{
 		1,             // Report ID 1
 		buttons,       // Buttons
@@ -107,6 +109,8 @@ func (u *UsbGadget) AbsMouseReport(x, y int, buttons uint8) error {
 func (u *UsbGadget) AbsMouseWheelReport(wheelY int8) error {
 	u.absMouseLock.Lock()
 	defer u.absMouseLock.Unlock()
+
+	u.log.Trace().Int8("wheelY", wheelY).Msg("AbsMouseWheelReport")
 
 	// Only send a report if the value is non-zero
 	if wheelY == 0 {

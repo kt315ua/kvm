@@ -214,6 +214,8 @@ func (u *UsbGadget) KeyboardReport(modifier uint8, keys []uint8) error {
 	u.keyboardLock.Lock()
 	defer u.keyboardLock.Unlock()
 
+	u.log.Trace().Uint8("modifier", modifier).Bytes("keys", keys).Msg("KeyboardReport")
+
 	if len(keys) > 6 {
 		keys = keys[:6]
 	}

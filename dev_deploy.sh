@@ -142,9 +142,11 @@ fi
 msg_info "▶ Building go binary"
 make build_dev
 
+msg_info "▶ Killing any existing instances of the application"
 # Kill any existing instances of the application
 ssh "${REMOTE_USER}@${REMOTE_HOST}" "killall jetkvm_app_debug || true"
 
+msg_info "▶ Copying binary to remote host"
 # Copy the binary to the remote host
 ssh "${REMOTE_USER}@${REMOTE_HOST}" "cat > ${REMOTE_PATH}/jetkvm_app_debug" < bin/jetkvm_app
 
@@ -156,6 +158,7 @@ if [ "$RESET_USB_HID_DEVICE" = true ]; then
     ssh "${REMOTE_USER}@${REMOTE_HOST}" "ls /sys/class/udc > /sys/kernel/config/usb_gadget/jetkvm/UDC"
 fi
 
+msg_info "▶ Deploying and running the application on the remote host"
 # Deploy and run the application on the remote host
 ssh "${REMOTE_USER}@${REMOTE_HOST}" ash << EOF
 set -e

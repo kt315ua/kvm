@@ -138,6 +138,7 @@ export default function KvmIdRoute() {
   const setPeerConnection = useRTCStore(state => state.setPeerConnection);
   const setDiskChannel = useRTCStore(state => state.setDiskChannel);
   const setRpcDataChannel = useRTCStore(state => state.setRpcDataChannel);
+  const setHidDataChannel = useRTCStore(state => state.setHidDataChannel);
   const setTransceiver = useRTCStore(state => state.setTransceiver);
   const location = useLocation();
 
@@ -485,6 +486,12 @@ export default function KvmIdRoute() {
       setRpcDataChannel(rpcDataChannel);
     };
 
+    const hidDataChannel = pc.createDataChannel("hid");
+    hidDataChannel.binaryType = "arraybuffer";
+    hidDataChannel.onopen = () => {
+      setHidDataChannel(hidDataChannel);
+    };
+
     const diskDataChannel = pc.createDataChannel("disk");
     diskDataChannel.onopen = () => {
       setDiskChannel(diskDataChannel);
@@ -501,6 +508,7 @@ export default function KvmIdRoute() {
     setPeerConnection,
     setPeerConnectionState,
     setRpcDataChannel,
+    setHidDataChannel,
     setTransceiver,
   ]);
 
